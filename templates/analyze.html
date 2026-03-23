@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Analyze Food — NutriSnap-X{% endblock %}
+{% block page_title %}Food Image Analysis{% endblock %}
+
+{% block content %}
+<div class="content-grid">
+
+  <div class="card-ns upload-card animate-in">
+    <div class="card-header-ns">
+      <span><i class="bi bi-camera-fill me-2 text-ns-green"></i>Upload Food Image</span>
+    </div>
+    <p class="text-muted small mb-4">
+      Upload a clear photo of your meal. Our AI will detect the food and estimate its nutritional content.
+    </p>
+
+    <form method="POST" enctype="multipart/form-data" id="analyzeForm">
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" name="food_image" id="foodImage" accept="image/*" class="upload-input" required />
+        <div class="upload-content" id="uploadContent">
+          <div class="upload-icon"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+          <p class="upload-text">Drag & drop or <span class="text-ns-green">browse</span> your photo</p>
+          <p class="upload-hint small text-muted">JPG, PNG, WEBP — max 16MB</p>
+        </div>
+        <img id="previewImg" class="upload-preview d-none" alt="Preview" />
+      </div>
+
+      <div class="mt-4 d-flex gap-3">
+        <button type="submit" class="btn btn-primary-ns flex-fill" id="analyzeBtn">
+          <span class="btn-text"><i class="bi bi-cpu me-2"></i>Analyse Now</span>
+          <span class="btn-loading d-none">
+            <span class="spinner-border spinner-border-sm me-2"></span>Analysing...
+          </span>
+        </button>
+        <button type="button" class="btn btn-outline-ns" onclick="clearUpload()">
+          <i class="bi bi-x-circle me-1"></i>Clear
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Info Card -->
+  <div class="card-ns info-side animate-in" style="--delay:0.1s">
+    <div class="card-header-ns">
+      <span><i class="bi bi-info-circle-fill me-2 text-ns-green"></i>How It Works</span>
+    </div>
+    <ol class="how-list">
+      <li>
+        <div class="how-step">1</div>
+        <div>
+          <strong>Upload Image</strong>
+          <p class="text-muted small mb-0">Take or upload a photo of your food</p>
+        </div>
+      </li>
+      <li>
+        <div class="how-step">2</div>
+        <div>
+          <strong>AI Detection</strong>
+          <p class="text-muted small mb-0">Our model identifies the food item</p>
+        </div>
+      </li>
+      <li>
+        <div class="how-step">3</div>
+        <div>
+          <strong>Nutrition Analysis</strong>
+          <p class="text-muted small mb-0">Get calories, protein, carbs, and more</p>
+        </div>
+      </li>
+      <li>
+        <div class="how-step">4</div>
+        <div>
+          <strong>Auto-Logged</strong>
+          <p class="text-muted small mb-0">Results saved to your dashboard</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="tip-item mt-3">
+      <i class="bi bi-lightbulb-fill text-warning"></i>
+      <span class="small">Best results with well-lit, close-up photos of a single food item.</span>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const zone    = document.getElementById('uploadZone');
+  const input   = document.getElementById('foodImage');
+  const preview = document.getElementById('previewImg');
+  const content = document.getElementById('uploadContent');
+  const form    = document.getElementById('analyzeForm');
+  const btn     = document.getElementById('analyzeBtn');
+
+  input.addEventListener('change', handleFile);
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) {
+      input.files = e.dataTransfer.files;
+      handleFile();
+    }
+  });
+
+  function handleFile() {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.classList.remove('d-none');
+      content.classList.add('d-none');
+      zone.classList.add('has-preview');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearUpload() {
+    input.value = '';
+    preview.src = '';
+    preview.classList.add('d-none');
+    content.classList.remove('d-none');
+    zone.classList.remove('has-preview', 'drag-over');
+  }
+
+  form.addEventListener('submit', () => {
+    btn.querySelector('.btn-text').classList.add('d-none');
+    btn.querySelector('.btn-loading').classList.remove('d-none');
+    btn.disabled = true;
+  });
+</script>
+{% endblock %}
